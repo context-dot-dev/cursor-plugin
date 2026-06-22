@@ -7,7 +7,7 @@ Official Cursor plugin for [Context.dev](https://context.dev): brand intelligenc
 | Component | Purpose |
 | --- | --- |
 | **MCP server** | Connects to Context.dev's hosted MCP at `https://context-dev.stlmcp.com` |
-| **Skills** | API reference skill + onboarding skill for API key setup |
+| **Skills** | API reference, Logo Link, and onboarding skill for API key setup |
 | **Commands** | `/brand-colors`, `/scrape-url` for common workflows |
 | **Rules** | Routes live-data questions to MCP and enforces secure API integration patterns |
 
@@ -68,6 +68,7 @@ Hosted HTTP connection to `context-dev.stlmcp.com`. Uses `${CONTEXT_DEV_API_KEY}
 ### Skills
 
 - `skills/context-dev/SKILL.md` — API endpoint reference, vendored from [docs.context.dev/skill.md](https://docs.context.dev/skill.md). Refresh with `node scripts/sync-skill.mjs`.
+- `skills/logolink/SKILL.md` — embed company logos in UI via Logo Link (`logos.context.dev`) with a public client ID.
 - `skills/get-api-key/SKILL.md` — onboarding flow when the user needs to sign up or configure their API key.
 
 ### Commands
