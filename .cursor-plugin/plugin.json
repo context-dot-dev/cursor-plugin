@@ -1,0 +1,33 @@
+{
+  "name": "context-dev",
+  "displayName": "Context.dev",
+  "version": "1.0.0",
+  "description": "Brand intelligence, web scraping, and structured extraction for AI agents via Context.dev MCP.",
+  "author": {
+    "name": "Context.dev",
+    "email": "hello@context.dev"
+  },
+  "homepage": "https://context.dev",
+  "repository": "https://github.com/context-dot-dev/cursor-plugin",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "context-dev",
+    "brand",
+    "brand-dev",
+    "context.dev",
+    "scraping",
+    "enrichment",
+    "classification",
+    "mcp",
+    "search",
+    "web-data",
+    "commands"
+  ],
+  "category": "data-analytics",
+  "tags": ["brand", "scraping", "enrichment", "mcp", "web-data"],
+  "rules": "./rules/",
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "mcpServers": "./mcp.json"
+}

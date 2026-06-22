@@ -1,0 +1,12 @@
+---
+description: Secure Context.dev API integration patterns for application code
+alwaysApply: true
+---
+
+context-dev-api-security:
+
+- Never expose `CONTEXT_DEV_API_KEY` in browser bundles, client-side env vars, or committed secrets. Proxy Context.dev calls through a backend.
+- Read the API key from `CONTEXT_DEV_API_KEY` (SDKs also accept `CONTEXT_API_KEY` as a fallback).
+- For high-volume logo rendering in UI, use Logo Link (`https://logos.context.dev/?publicClientId=...&domain=...`) with a public client ID instead of calling the brand API from the frontend.
+- Handle 422 responses from email-based endpoints as "skip enrichment" for free or disposable email providers.
+- Set generous `timeoutMS` for cold brand lookups, or prefetch known domains ahead of user-facing calls.

@@ -1,0 +1,53 @@
+name: Validate Cursor Plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - ".cursor-plugin/**"
+      - ".github/**"
+      - "assets/**"
+      - "commands/**"
+      - "mcp.json"
+      - "README.md"
+      - "rules/**"
+      - "scripts/**"
+      - "skills/**"
+      - "LICENSE"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate plugin
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate plugin structure
+        run: node scripts/validate-plugin.mjs
+
+      - name: Check MCP server health
+        run: |
+          response=$(curl -fsS "https://context-dev.stlmcp.com/health")
+          if [ "$response" != "OK" ]; then
+            echo "Unexpected health response: $response"
+            exit 1
+          fi
+          echo "MCP health check passed"

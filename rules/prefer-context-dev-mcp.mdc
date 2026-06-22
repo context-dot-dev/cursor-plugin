@@ -1,0 +1,12 @@
+---
+description: Prefer Context.dev MCP for live brand, web, and enrichment data instead of guessing from training data
+alwaysApply: false
+---
+
+When the user asks for company logos, brand colors, scraped web content, product extraction, industry classification, transaction enrichment, or other live web data:
+
+1. Use the `context_dev_api` MCP server (`search_docs` then `execute`) instead of answering from memory.
+2. Pick the narrowest endpoint that answers the question (for example `retrieve-simplified` when only logos and colors are needed).
+3. Prefer bare domains (`stripe.com`) over full URLs where the API expects a domain.
+4. Mention `key_metadata.credits_consumed` and `key_metadata.credits_remaining` when credit usage is relevant.
+5. If MCP is unavailable, tell the user to configure `CONTEXT_DEV_API_KEY` in Cursor MCP settings rather than fabricating data.
