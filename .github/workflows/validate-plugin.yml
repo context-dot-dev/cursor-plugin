@@ -43,11 +43,8 @@ jobs:
       - name: Validate plugin structure
         run: node scripts/validate-plugin.mjs
 
-      - name: Check MCP server health
-        run: |
-          response=$(curl -fsS "https://context-dev.stlmcp.com/health")
-          if [ "$response" != "OK" ]; then
-            echo "Unexpected health response: $response"
-            exit 1
-          fi
-          echo "MCP health check passed"
+      - name: Verify bundled skill is current
+        run: node scripts/sync-skill.mjs --check
+
+      - name: Check production MCP and OAuth discovery
+        run: node scripts/check-mcp-oauth.mjs

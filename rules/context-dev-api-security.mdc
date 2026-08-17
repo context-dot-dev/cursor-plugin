@@ -1,12 +1,12 @@
 ---
-description: Secure Context.dev API integration patterns for application code
-alwaysApply: true
+description: Apply secure authentication and side-effect handling when writing Context.dev integrations
+alwaysApply: false
 ---
 
 context-dev-api-security:
 
-- Never expose `CONTEXT_DEV_API_KEY` in browser bundles, client-side env vars, or committed secrets. Proxy Context.dev calls through a backend.
-- Read the API key from `CONTEXT_DEV_API_KEY` (SDKs also accept `CONTEXT_API_KEY` as a fallback).
+- Use Cursor OAuth for the bundled `context` MCP server. Never ask users to paste an MCP credential into chat.
+- When application code calls the REST API or SDK directly, never expose `CONTEXT_DEV_API_KEY` in browser bundles, client-side environment variables, logs, or committed files. Read it server-side and proxy browser requests through a backend.
 - For high-volume logo rendering in UI, use Logo Link (`https://logos.context.dev/?publicClientId=...&domain=...`) with a public client ID instead of calling the brand API from the frontend.
 - Handle 422 responses from email-based endpoints as "skip enrichment" for free or disposable email providers.
-- Set generous `timeoutMS` for cold brand lookups, or prefetch known domains ahead of user-facing calls.
+- Treat browser actions, monitor changes, and batch lifecycle operations according to their real side effects. Require explicit user intent before an operation can submit forms, trigger webhooks, overwrite monitor configuration, cancel work, or delete stored data.

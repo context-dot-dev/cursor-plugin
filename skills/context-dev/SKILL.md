@@ -1,8 +1,12 @@
 ---
 name: context-dev
-description: Use Context.dev to resolve brands, scrape/crawl websites, extract products and structured data, and classify industries. Use when the user asks about company logos/colors, web scraping, lead enrichment, design systems, or integrating Context.dev APIs.
+description: Use this skill to call the Context.dev API for brand data and web extraction. Make sure to use this skill whenever the user wants to look up a company's logo, colors, socials, industry, address, employee count, or stock ticker by domain, name, work email, ticker, or ISIN; enrich a lead or CRM record; enrich a person or contact from an email, name, or social profile URL; pre-fill an onboarding form; build a customer logo wall or "trusted by" strip; categorize a card or bank transaction descriptor (e.g. "AMZN MKTP US"); scrape a webpage to clean markdown or HTML for an LLM or RAG pipeline; crawl a site or fetch its sitemap; run a web search; extract products or pricing from a storefront; take a screenshot of a webpage; pull a website's design system (colors, fonts, spacing, components) for theming; classify a company by NAICS or SIC; or extract structured data from a website with a JSON Schema, even if they don't explicitly mention "Context.dev" or "Brand API". Requires a CONTEXT_DEV_API_KEY environment variable.
+license: MIT
+compatibility: Requires a Context.dev API key in the CONTEXT_DEV_API_KEY environment variable. SDKs for TypeScript, Python, Ruby, Go, and PHP; or call the REST API directly.
+metadata:
+  author: context.dev
+  version: "3.1"
 ---
-
 
 # Context.dev
 
@@ -26,27 +30,31 @@ Install an SDK, or call REST directly with `curl`:
 | Python     | `pip install context.dev`                          | `from context.dev import ContextDev`                            |
 | Ruby       | `gem install context.dev`                          | `require "context_dev"`                                         |
 | Go         | `go get github.com/context-dot-dev/context-go-sdk` | `import contextdev "github.com/context-dot-dev/context-go-sdk"` |
+| PHP        | `composer require context-dev/context-dev-php`   | `use ContextDev\Client;`                                        |
 
 ```typescript
 import ContextDev from "context.dev";
 const client = new ContextDev({ apiKey: process.env.CONTEXT_DEV_API_KEY });
-const { brand } = await client.brand.retrieve({ domain: "stripe.com" });
+const { brand } = await client.brand.retrieve({ type: "by_domain", domain: "stripe.com" });
 ```
 
-**SDK naming.** Methods below are shown in TypeScript camelCase (`client.brand.retrieve`). Python and Ruby use snake_case (`retrieve`, `retrieve_by_name`); Go uses PascalCase and renames a few (`client.Brand.Get`, `client.Industry.GetNaics`). Methods are grouped under five namespaces that don't always match the URL path: `brand.*`, `web.*`, `ai.*`, `industry.*` (NAICS/SIC, despite `/web/` paths), `utility.*` (prefetch). The Python SDK currently lags the others: a few methods live under different namespaces (`client.style.*` for styleguide/fonts) or are missing; if an SDK method is missing or unavailable, call the REST path directly. See [best practices](https://docs.context.dev/optimization/best-practices).
+**SDK naming.** Methods below are shown in TypeScript camelCase (`client.brand.retrieve`). Python and Ruby use snake_case (`retrieve`); PHP uses the same camelCase method names as TypeScript with named parameters (`$client->brand->retrieve(type: 'by_domain', domain: 'stripe.com')`); Go uses PascalCase and renames a few (`client.Brand.Get`, `client.Industry.GetNaics`). Methods are grouped under five namespaces that don't always match the URL path: `brand.*`, `web.*`, `ai.*`, `industry.*` (NAICS/SIC, despite `/web/` paths), `utility.*` (prefetch). The Python SDK currently lags the others: a few methods live under different namespaces (`client.style.*` for styleguide/fonts) or are missing; if an SDK method is missing or unavailable, call the REST path directly. See [best practices](https://docs.context.dev/optimization/best-practices).
 
 ## Choosing an endpoint
 
 Pick the narrowest endpoint that answers the question. Start from what you already have:
 
-| You have                          | Use                                              | Path                                         |
-| --------------------------------- | ------------------------------------------------ | -------------------------------------------- |
-| A domain, want everything         | Retrieve Brand                                   | `GET /brand/retrieve`                        |
-| A domain, only need logo + colors | Retrieve Simplified (same price, smaller/faster) | `GET /brand/retrieve-simplified`             |
-| A company name                    | Retrieve by Name                                 | `GET /brand/retrieve-by-name`                |
-| A work email                      | Retrieve by Email                                | `GET /brand/retrieve-by-email`               |
-| A stock ticker / ISIN             | Retrieve by Ticker / ISIN                        | `GET /brand/retrieve-by-ticker` · `-by-isin` |
-| A card/bank descriptor            | Transaction Enrichment                           | `GET /brand/transaction_identifier`          |
+| You have                          | Use                                              | Path                                                              |
+| --------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------- |
+| A domain, want everything         | Retrieve Brand                                   | `POST /brand/retrieve` with `type: "by_domain"`                   |
+| A domain, only need logo + colors | Retrieve Simplified (same price, smaller/faster) | `GET /brand/retrieve-simplified`                                  |
+| A company name                    | Retrieve by Name                                 | `POST /brand/retrieve` with `type: "by_name"`                     |
+| A work email                      | Retrieve by Email                                | `POST /brand/retrieve` with `type: "by_email"`                    |
+| A stock ticker                    | Retrieve by Ticker                               | `POST /brand/retrieve` with `type: "by_ticker"`                   |
+| An ISIN                           | Retrieve by ISIN                                 | `GET /brand/retrieve-by-isin`                                     |
+| A card/bank descriptor            | Brand transaction lookup                         | `POST /brand/retrieve` with `type: "by_transaction"`              |
+| A person's email, name, or social profile URL | Enrich Person (beta)                 | `POST /people/enrich`                                             |
+| A specific page URL you want scraped for brand fields | Retrieve by direct URL                | `POST /brand/retrieve` with `type: "by_direct_url"`               |
 | A URL → clean text for an LLM     | Scrape Markdown                                  | `GET /web/scrape/markdown`                   |
 | A whole site → text for RAG       | Crawl                                            | `POST /web/crawl`                            |
 | A design system to copy/theme     | Styleguide                                       | `GET /web/styleguide`                        |
@@ -60,11 +68,11 @@ Pick the narrowest endpoint that answers the question. Start from what you alrea
 
 ## Brand intelligence
 
-All seven brand endpoints share the same response envelope: `{ status, code, brand }`. They cost **10 credits** each and only bill on a successful resolution (a 400 `NOT_FOUND` "no brand" response is free). Guide: [Get brand data](https://docs.context.dev/guides/get-brand-data).
+Brand lookups share the same response envelope: `{ status, code, brand }`. They cost **10 credits** each and only bill on a successful resolution (a 400 `NOT_FOUND` "no brand" response is free). Guide: [Get brand data](https://docs.context.dev/guides/get-brand-data).
 
 ### The `brand` object (shared response shape)
 
-This is what `brand` contains on the full endpoints (`retrieve`, `by-name`, `by-email`, `by-ticker`, `by-isin`, `transaction_identifier`). Any field may be `null`/absent, so always provide fallbacks.
+This is what `brand` contains on full Brand responses from `POST /brand/retrieve`, including domain, name, email, ticker, ISIN, and transaction lookups. Any field may be `null`/absent, so always provide fallbacks.
 
 | Field                         | Type         | Notes                                                                                                                                                                                                                              |
 | ----------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -78,6 +86,7 @@ This is what `brand` contains on the full endpoints (`retrieve`, `by-name`, `by-
 | `brand.socials[]`             | array        | `{ type, url }`. `type` ∈ x, facebook, instagram, linkedin, youtube, tiktok, github, +24 more.                                                                                                                                     |
 | `brand.address`               | object       | `street, city, state_province, state_code, country, country_code, postal_code`.                                                                                                                                                    |
 | `brand.stock`                 | object\|null | `{ ticker, exchange }`. `null` for private companies.                                                                                                                                                                              |
+| `brand.employees`             | object\|null | `{ range, exact }`. `range` is a bucket from `1 to 10` through `10001+`; `exact` is the precise headcount when known. `null` when unknown.                                                                                          |
 | `brand.industries.eic[]`      | array        | `{ industry, subindustry }`: Context's own taxonomy ([EIC](https://docs.context.dev/guides/classification/EIC)), inline on every full response. For NAICS/SIC use the dedicated endpoints.                                         |
 | `brand.links`                 | object       | `careers, blog, pricing, contact, terms, privacy`, each nullable.                                                                                                                                                                  |
 | `brand.email` / `brand.phone` | string       | Public contact info, when found.                                                                                                                                                                                                   |
@@ -112,11 +121,11 @@ This is what `brand` contains on the full endpoints (`retrieve`, `by-name`, `by-
 
 ### Retrieve brand by domain
 
-`GET /brand/retrieve` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
+`POST /brand/retrieve` with `type: "by_domain"` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
 [Guide](https://docs.context.dev/guides/get-brand-data#get-a-brand-by-domain) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-brand-data-by-domain)
 
 - **When:** you have the company's website domain and want the full profile (logos, colors, socials, address, industry, stock).
-- **Takes:** `domain` (string, **required**, bare domain). Optional: `maxSpeed` (bool; skip slow steps for a faster, lighter answer), `force_language` ([SupportedLanguage](https://docs.context.dev/guides/get-brand-data) enum), `maxAgeMs` (int, default `7776000000` ≈ 90d, clamped 1d–1y), `timeoutMS` (int, max `300000`).
+- **Takes (JSON body):** `type: "by_domain"` (**required** discriminator), `domain` (string, **required**, bare domain). Optional: `maxSpeed` (bool; skip slow steps for a faster, lighter answer), `force_language` ([SupportedLanguage](https://docs.context.dev/guides/get-brand-data) enum), `maxAgeMs` (int, default `7776000000` ≈ 90d, clamped 1d–1y), `timeoutMS` (int, max `300000`).
 - **Gives:** the shared `{ status, code, brand }` envelope above.
 
 ### Retrieve simplified
@@ -125,47 +134,65 @@ This is what `brand` contains on the full endpoints (`retrieve`, `by-name`, `by-
 [Guide](https://docs.context.dev/guides/get-brand-data#get-a-brand-by-domain) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-simplified-brand-data-by-domain)
 
 - **When:** you have a domain and only need lightweight visual assets. Fastest payload for logo walls, signup pre-fill, or theming.
-- **Takes:** `domain` (string, **required**), `maxAgeMs`, `timeoutMS`. No name/email/ticker/`maxSpeed`/`force_language`.
+- **Takes:** `domain` (string, **required**), `theme` (`light`|`dark`; selects matching assets), `maxAgeMs`, `timeoutMS`. No name/email/ticker/`maxSpeed`/`force_language`.
 - **Gives:** `{ status, code, brand }` where `brand` is **stripped to `domain`, `title`, `colors[]`, `logos[]`, `backdrops[]` only**: no description, socials, address, stock, industries, or links. Same 10-credit price as the full retrieve, just less data.
 
 ### Retrieve by company name
 
-`GET /brand/retrieve-by-name` · 10 credits · SDK `client.brand.retrieveByName` (Go `Brand.GetByName`)
-[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-company-name) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-brand-data-by-company-name)
+`POST /brand/retrieve` with `type: "by_name"` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
+[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-company-name) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/brand)
 
 - **When:** you only know the company name and need Context to resolve it to a domain + full profile.
-- **Takes:** `name` (string, **required**, 3–30 chars). Optional: `country_gl` (ISO 3166-1 alpha-2 hint to disambiguate, e.g. `us`), `maxSpeed`, `force_language`, `maxAgeMs`, `timeoutMS`.
+- **Takes (JSON body):** `type: "by_name"` (**required**), `name` (string, **required**, 3–30 chars). Optional: `country_gl` (ISO 3166-1 alpha-2 hint to disambiguate, e.g. `us`), `maxSpeed`, `force_language`, `maxAgeMs`, `timeoutMS`.
 - **Gives:** the full shared `brand` envelope.
 
 ### Retrieve by work email
 
-`GET /brand/retrieve-by-email` · 10 credits · SDK `client.brand.retrieveByEmail` (Go `Brand.GetByEmail`)
-[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-work-email) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-brand-data-by-email-address)
+`POST /brand/retrieve` with `type: "by_email"` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
+[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-work-email) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/brand)
 
 - **When:** lead/onboarding enrichment from a work email; the domain is extracted automatically.
-- **Takes:** `email` (string, **required**). Optional: `maxSpeed`, `force_language`, `maxAgeMs`, `timeoutMS`.
+- **Takes (JSON body):** `type: "by_email"` (**required**), `email` (string, **required**). Optional: `maxSpeed`, `force_language`, `maxAgeMs`, `timeoutMS`.
 - **Gives:** the full shared `brand` envelope.
 - **Note:** free providers (gmail, outlook…) and disposable addresses return **HTTP 422** (`FREE_EMAIL_DETECTED` / `DISPOSABLE_EMAIL_DETECTED`); handle 422 as "skip enrichment", not a hard error.
 
-### Retrieve by ticker / ISIN
+### Retrieve by ticker
 
-`GET /brand/retrieve-by-ticker` · `GET /brand/retrieve-by-isin` · 10 credits · SDK `client.brand.retrieveByTicker` / `retrieveByIsin` (Go `Brand.GetByTicker` / `GetByIsin`)
-[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-stock-ticker) · [Ticker API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-brand-data-by-stock-ticker)
+`POST /brand/retrieve` with `type: "by_ticker"` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
+[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-stock-ticker) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/brand)
 
-- **When:** investor/finance flows where the key is a listing identifier.
-- **Ticker takes:** `ticker` (string, **required**, 1–15 chars, e.g. `AAPL`, `BRK.A`). Optional `ticker_exchange` (**defaults to NASDAQ**; set it for non-NASDAQ listings), plus `maxSpeed`/`force_language`/`maxAgeMs`/`timeoutMS`.
-- **ISIN takes:** `isin` (string, **required**, exactly 12 chars `^[A-Z]{2}[A-Z0-9]{9}[0-9]$`, e.g. `US0378331005`). _ISIN is a niche/hidden lookup; the ticker endpoint is the common one._
+- **When:** investor/finance flows keyed on a listed ticker.
+- **Takes (JSON body):** `type: "by_ticker"` (**required**), `ticker` (string, **required**, 1–15 chars, e.g. `AAPL`, `BRK.A`). Optional `ticker_exchange` (**defaults to NASDAQ**; set it for non-NASDAQ listings), plus `maxSpeed`/`force_language`/`maxAgeMs`/`timeoutMS`.
+- **Gives:** the full shared `brand` envelope, with `brand.stock` populated.
+
+### Retrieve by ISIN
+
+`GET /brand/retrieve-by-isin` · 10 credits · SDK `client.brand.retrieveByIsin` (Go `Brand.GetByIsin`)
+[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-isin) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/retrieve-brand-data-by-isin)
+
+- **When:** you're joining against financial feeds keyed on ISIN. Ticker lookups are the common path; ISIN is the niche/hidden one.
+- **Takes:** `isin` (string, **required**, exactly 12 chars `^[A-Z]{2}[A-Z0-9]{9}[0-9]$`, e.g. `US0378331005`), plus `maxSpeed`/`force_language`/`maxAgeMs`/`timeoutMS`.
 - **Gives:** the full shared `brand` envelope, with `brand.stock` populated.
 
 ### Transaction enrichment
 
-`GET /brand/transaction_identifier` · 10 credits · SDK `client.brand.identifyFromTransaction` (Go `Brand.IdentifyFromTransaction`)
-[Guide](https://docs.context.dev/guides/enrich-transaction-codes) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/identify-brand-from-transaction-data)
+`POST /brand/retrieve` with `type: "by_transaction"` · 10 credits · SDK `client.brand.retrieve`
+[Guide](https://docs.context.dev/guides/enrich-transaction-codes) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/brand)
 
 - **When:** you have a messy card/ACH descriptor (`AMZN MKTP US`, `SQ *COFFEE BAR`) and need the real merchant brand for spend analytics or categorization.
-- **Takes:** `transaction_info` (string, **required**). Optional disambiguators sharply improve accuracy: `mcc` (4-digit category code), `city`, `country_gl` (ISO alpha-2), `phone` (number), `high_confidence_only` (bool, default false; set true for fewer false matches), `maxSpeed`, `force_language`, `timeoutMS`.
+- **Takes (JSON body):** `type: "by_transaction"` (**required**), `transaction_info` (string, **required**). Optional disambiguators sharply improve accuracy: `mcc` (4-digit category code), `city`, `country_gl` (ISO alpha-2), `phone` (number), `high_confidence_only` (bool, default false; set true for fewer false matches), `maxSpeed`, `force_language`, `timeoutMS`.
 - **Gives:** the full shared `brand` envelope (the identified merchant).
-- **Note:** this is the only brand endpoint that does **not** accept `maxAgeMs`.
+- **Note:** this is the only brand lookup that does **not** accept `maxAgeMs`.
+
+### Retrieve by direct URL
+
+`POST /brand/retrieve` with `type: "by_direct_url"` · 10 credits · SDK `client.brand.retrieve` (Go `Brand.Get`)
+[Guide](https://docs.context.dev/guides/get-brand-data#look-up-by-direct-url) · [API reference](https://docs.context.dev/api-reference/brand-intelligence/brand)
+
+- **When:** you want brand fields scraped from **one specific page** — a subpath, landing page, preview URL, or a domain the database doesn't cover yet. Fetches only that URL; no domain resolution, DB lookup, or cross-source enrichment.
+- **Takes (JSON body):** `type: "by_direct_url"` (**required**), `direct_url` (string, **required**, full http(s) URL). Optional: `timeoutMS`. Rejects `maxSpeed`, `force_language`, and `maxAgeMs` — those would be silently ignored by the single-page scrape flow.
+- **Gives:** the shared `brand` envelope, but only fields extractable from the page: `domain`, `title`, `description`, `logos` (URLs only), `socials`, `email`, `phone`, `links`. Enrichment-only fields (`colors`, `backdrops`, `industries`, `stock`, `address`) are omitted.
+- **Note:** unreachable URLs return `400` `WEBSITE_ACCESS_ERROR` (or `WEBSITE_NOT_FOUND` when the domain doesn't resolve at all).
 
 ---
 
@@ -179,35 +206,39 @@ Render, crawl, and search the live web. Bot-detection bypass and proxy escalatio
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown#scrape-a-single-page-to-markdown) · [API reference](https://docs.context.dev/api-reference/web-scraping/scrape-markdown)
 
 - **When:** turn one page into clean, LLM-ready GitHub-Flavored Markdown (nav/ads stripped). The default for feeding pages to a model.
-- **Takes:** `url` (string URI, **required**). Optional: `includeLinks` (default true), `includeImages` (default false), `shortenBase64Images` (default true), `useMainContentOnly` (default false), `includeFrames` (default false), `includeSelectors[]`/`excludeSelectors[]` (CSS selectors to keep/remove before conversion; exclusion wins), `pdf` object (`shouldParse` default true, `start`/`end` page range), `maxAgeMs` (default 1d, 0–30d), `waitForMs` (0–30000 render wait), `headers` object (forwarded to the target URL; bypasses cache), `timeoutMS`.
-- **Gives:** `{ success: true, markdown, url }`.
+- **Takes:** `url` (string URI, **required**). Optional: `includeLinks` (default true), `includeImages` (default false), `shortenBase64Images` (default true), `useMainContentOnly` (default false), `includeHTML` (default false; adds the source HTML beside the Markdown), `includeFrames` (default false), `includeSelectors[]`/`excludeSelectors[]` (CSS selectors to keep/remove before conversion; exclusion wins), `pdf` object (`shouldParse` default true, `start`/`end` page range, `ocr` default false — OCRs scanned pages at **1 credit per recovered page**; a scan with `ocr` off returns `400 PDF_IMAGES_ONLY`), `maxAgeMs` (default 1d, 0–30d), `waitForMs` (0–30000 render wait), `settleAnimations`, `country`, `actions[]` (up to 5 ordered `{do: "wait", timeMs}` / `{do: "perform", action}` steps; **paid plan only, 2 credits, bypasses cache**), `headers` object (forwarded to the target URL; bypasses cache), `timeoutMS`.
+- **Gives:** `{ success: true, markdown, html?, contentLength, url, metadata }`. `metadata.headings[]` contains `{ level, text }` entries in document order when headings are present.
 
 ### Scrape HTML
 
-`GET /web/scrape/html` · 1 credit · SDK `client.web.webScrapeHTML` (Go `Web.WebScrapeHTML`)
+`GET /web/scrape/html` · **1 credit (2 with `actions`)** · SDK `client.web.webScrapeHTML` (Go `Web.WebScrapeHTML`)
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown#scrape-a-single-page-to-markdown) · [API reference](https://docs.context.dev/api-reference/web-scraping/scrape-html)
 
 - **When:** you need the fully-rendered raw HTML (to parse the DOM, attributes, or scripts) instead of cleaned text.
-- **Takes:** `url` (**required**), `pdf`, `includeFrames`, `useMainContentOnly`, `includeSelectors[]`/`excludeSelectors[]`, `maxAgeMs`, `waitForMs`, `headers`, `timeoutMS` (same shapes as Scrape Markdown).
-- **Gives:** `{ success: true, html, url }`.
+- **Takes:** `url` (**required**), `pdf`, `includeFrames`, `useMainContentOnly`, `includeSelectors[]`/`excludeSelectors[]`, `maxAgeMs`, `waitForMs`, `settleAnimations`, `country`, `actions[]` (paid plan only, 2 credits, bypasses cache; same shape as Scrape Markdown), `headers`, `timeoutMS` (same shapes as Scrape Markdown).
+- **Gives:** `{ success: true, html, url, type, metadata }`. `metadata.headings[]` is present when headings were found.
+
+### Scrape Markdown / HTML with actions
+
+Attach `actions` to `/web/scrape/markdown` or `/web/scrape/html` when the page only reveals its content after interaction (cookie banners, "Load more" buttons, tab switches). Up to **5 ordered actions** run after page load and before capture. Each is a discriminated object: `{do: "wait", timeMs: <0–30000>}` or `{do: "perform", action: "<natural-language instruction, ≤500 chars>"}`. **Paid plan required** — free-tier keys get `403 PAID_PLAN_REQUIRED`. Any action bumps the call to **2 credits** (5 for enriched images) and bypasses the scrape cache and HTML/PDF fast paths.
 
 ### Scrape Images
 
-`GET /web/scrape/images` · **1 credit (5 if any enrichment flag is set)** · SDK `client.web.webScrapeImages` (Go `Web.WebScrapeImages`)
+`GET /web/scrape/images` · **1 credit · 2 with `actions` · 5 if any enrichment flag is set** · SDK `client.web.webScrapeImages` (Go `Web.WebScrapeImages`)
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown#extract-every-image-on-a-page) · [API reference](https://docs.context.dev/api-reference/web-scraping/scrape-images)
 
 - **When:** enumerate every image on a page (`img`, inline SVG, CSS backgrounds, video posters, data URIs) and optionally measure / classify / CDN-host them.
-- **Takes:** `url` (**required**), `maxAgeMs`, `waitForMs`, `headers` (forwarded to the target URL; bypasses cache), `timeoutMS`, and an `enrichment` object: `resolution` (bool), `hostedUrl` (bool), `classification` (bool), `maxTimePerMs` (int). **Enabling any enrichment flag makes the whole call cost 5 credits** (not per-image).
+- **Takes:** `url` (**required**), `maxAgeMs`, `dedupe` (perceptually remove near-duplicates), `waitForMs`, `actions[]` (paid plan only, 2 credits, bypasses cache; same shape as Scrape Markdown — enriched calls stay at 5 credits), `headers` (forwarded to the target URL; bypasses cache), `timeoutMS`, and an `enrichment` object: `resolution` (bool), `hostedUrl` (bool), `classification` (bool), `maxTimePerMs` (int). **Enabling any enrichment flag makes the whole call cost 5 credits** (not per-image).
 - **Gives:** `{ success, images[], url }`. Each image: `{ src, element (img|svg|css|background|…), type (url|html|base64), alt|null, enrichment{ width, height, mimetype, url, type(photography|illustration|logo|wordmark|icon|…) } }`. The `enrichment` sub-fields populate only for the flags you requested.
 
 ### Crawl Sitemap
 
-`GET /web/scrape/sitemap` · 1 credit · SDK `client.web.webScrapeSitemap` (Go `Web.WebScrapeSitemap`)
+`GET /web/scrape/sitemap` · **1 credit (2 with `search`)** · SDK `client.web.webScrapeSitemap` (Go `Web.WebScrapeSitemap`)
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown#get-all-urls-of-a-domain) · [API reference](https://docs.context.dev/api-reference/web-scraping/crawl-sitemap)
 
 - **When:** discover the URL inventory of a domain (cheap, no page content) before deciding what to scrape or crawl.
-- **Takes:** `domain` (string, **required**, bare domain, not a URL). Optional: `maxLinks` (default 10000, 1–100000), `urlRegex` (RE2, ≤256 chars, filters which URLs return), `headers` (forwarded to the target URL; bypasses cache), `timeoutMS`.
-- **Gives:** `{ success, domain, urls[], meta{ sitemapsDiscovered, sitemapsFetched, sitemapsSkipped, errors } }`. Returns URLs only; it does not fetch page content despite the "Crawl" name.
+- **Takes:** `domain` (string, **required**, bare domain, not a URL). Optional: `maxLinks` (default 10000, 1–100000), `urlRegex` (RE2, ≤256 chars, filters which URLs return), `search` (string, 2–200 chars; filters the crawled sitemap to the pages about that phrase, e.g. `pricing and plans`, most relevant first — bumps the call to **2 credits**), `headers` (forwarded to the target URL; bypasses cache), `timeoutMS`.
+- **Gives:** `{ success, domain, urls[], meta{ sitemapsDiscovered, sitemapsFetched, sitemapsSkipped, errors } }`. Returns URLs only; it does not fetch page content despite the "Crawl" name. With `search` set, `urls[]` contains only the matching pages, most relevant first.
 
 ### Crawl Website
 
@@ -215,17 +246,17 @@ Render, crawl, and search the live web. Bot-detection bypass and proxy escalatio
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown#crawl-a-whole-site) · [API reference](https://docs.context.dev/api-reference/web-scraping/crawl-website-&-scrape-markdown)
 
 - **When:** traverse a site from a seed URL and collect every page's Markdown in one call, e.g. ingesting a docs site or blog into RAG.
-- **Takes (JSON body):** `url` (**required**). Optional: `maxPages` (default 100, **hard cap 500**), `maxDepth`, `urlRegex` (limit which links to follow), `followSubdomains` (default false), `includeLinks`/`includeImages`/`shortenBase64Images`/`useMainContentOnly`, `includeSelectors[]`/`excludeSelectors[]`, `pdf`, `includeFrames`, `maxAgeMs`, `waitForMs`, `stopAfterMs` (soft budget, default 80000, range 10000–110000, returns partial results early), `timeoutMS` (hard abort).
+- **Takes (JSON body):** `url` (**required**). Optional: `maxPages` (default 100, **hard cap 500**), `maxDepth`, `urlRegex` (limit which links to follow), `followSubdomains` (default false), `includeLinks`/`includeImages`/`shortenBase64Images`/`useMainContentOnly`, `includeSelectors[]`/`excludeSelectors[]`, `pdf`, `includeFrames`, `maxAgeMs`, `waitForMs`, `settleAnimations`, `country`, `stopAfterMs` (soft budget, default 80000, range 10000–110000, returns partial results early), `timeoutMS` (hard abort).
 - **Gives:** `{ results[], metadata }`. Each result: `{ markdown, metadata{ url, title, crawlDepth, statusCode, success } }`. Top-level `metadata`: `{ numUrls, maxCrawlDepth, numSucceeded, numFailed, numSkipped }`. Failed pages appear with empty `markdown` and `success: false`; skipped URLs are counted but omitted. **Billed per page crawled**, so set `maxPages` conservatively.
 
 ### Web Search
 
-`POST /web/search` · **1 credit per result** · SDK `client.web.search` (Go `Web.Search`)
+`POST /web/search` · **1 credit per 10 results** · SDK `client.web.search` (Go `Web.Search`)
 [Guide](https://docs.context.dev/guides/scrape-websites-to-markdown) · [API reference](https://docs.context.dev/api-reference/web-scraping/web-search)
 
 - **When:** find relevant pages for a natural-language query across the web (optionally scraping each hit to Markdown in the same round-trip) and you don't already have a URL.
 - **Takes (JSON body):** `query` (string, **required**, 1–500 chars). Optional: `includeDomains[]`, `excludeDomains[]`, `freshness` (`last_24_hours`|`last_week`|`last_month`|`last_year`), `queryFanout` (bool), `markdownOptions` (off by default; set `enabled: true` to scrape each result, with the same markdown sub-options as Scrape Markdown), `timeoutMS`.
-- **Gives:** `{ results[], query }`. Each result: `{ url, title, description, relevance (high|medium|low), markdown{ markdown|null, code } }`. **Always check `markdown.code` first**: `NOT_REQUESTED` (scraping off), `SUCCESS`, `TIMEOUT`, `WEBSITE_ACCESS_ERROR`, `ERROR`; only `SUCCESS` guarantees non-null markdown.
+- **Gives:** `{ results[], query }`. Each result: `{ url, title, description, relevance (high|medium|low), markdown{ markdown|null, code } }`. **Always check `markdown.code` first**: `NOT_REQUESTED` (scraping off), `SUCCESS`, `TIMEOUT`, `CONTENT_TOO_LARGE` (result page over the 20 MB cap), `WEBSITE_ACCESS_ERROR`, `ERROR`; only `SUCCESS` guarantees non-null markdown.
 
 ---
 
@@ -239,7 +270,7 @@ Extract a site's visual system to reproduce or theme on-brand. XOR rule: pass **
 [Guide](https://docs.context.dev/guides/extract-design-system-from-website#extract-the-full-styleguide) · [API reference](https://docs.context.dev/api-reference/web-extraction/scrape-styleguide)
 
 - **When:** you need the full design system: palette, type scale, spacing, shadows, and paste-ready button/card CSS.
-- **Takes:** `domain` **or** `directUrl` (one required), `maxAgeMs` (default `7776000000` ≈ 90d, clamped 1d–1y), `timeoutMS`.
+- **Takes:** `domain` **or** `directUrl` (one required), `colorScheme` (`light`|`dark`; emulates `prefers-color-scheme` and is included in the cache key), `maxAgeMs` (default `7776000000` ≈ 90d, clamped 1d–1y), `timeoutMS`.
 - **Gives:** `{ status, domain, code, styleguide }` where `styleguide` =
   - `mode` (`light`|`dark`)
   - `colors` `{ accent, background, text }` (hex)
@@ -264,11 +295,11 @@ Extract a site's visual system to reproduce or theme on-brand. XOR rule: pass **
 
 ### Capture Screenshot
 
-`GET /web/screenshot` · 5 credits · SDK `client.web.screenshot` (Go `Web.Screenshot`)
+`GET /web/screenshot` · 1 credit · SDK `client.web.screenshot` (Go `Web.Screenshot`)
 [Guide](https://docs.context.dev/guides/take-webpage-screenshot) · [API reference](https://docs.context.dev/api-reference/web-scraping/scrape-screenshot)
 
 - **When:** a rendered PNG of a page, for link previews, share cards, or visual archives.
-- **Takes:** `domain` **or** `directUrl` (one required, XOR). Optional: `fullScreenshot` (**string** `"true"`/`"false"`, not a JSON bool), `handleCookiePopup` (string `"true"`/`"false"`, default `"false"`), `viewport` object `{ width 240–7680 default 1920, height 240–4320 default 1080 }`, `page` (enum `login|signup|blog|careers|pricing|terms|privacy|contact`; auto-finds that page type; **only works with `domain`**, ignored with `directUrl`), `maxAgeMs`, `waitForMs` (default 3000), `timeoutMS`.
+- **Takes:** `domain` **or** `directUrl` (one required, XOR). Optional: `fullScreenshot` (**string** `"true"`/`"false"`, not a JSON bool), `handleCookiePopup` (boolean, default `false`), `colorScheme` (`light`|`dark`), `viewport` object `{ width 240–7680 default 1920, height 240–4320 default 1080 }`, `scrollOffset` (integer 0–100000; takes precedence over `fullScreenshot`), `page` (enum `login|signup|blog|careers|pricing|terms|privacy|contact`; auto-finds that page type; **only works with `domain`**, ignored with `directUrl`), `country` (ISO 3166-1 alpha-2), `maxAgeMs`, `waitForMs` (default 3000), `timeoutMS`.
 - **Gives:** `{ status, domain, screenshot, screenshotType (viewport|fullPage), width, height, code }`. `screenshot` is a hosted public image URL, not inline bytes.
 
 ---
@@ -285,7 +316,7 @@ LLM-backed structured extraction. All 10 credits, `POST` with JSON body. SDK nam
 - **When:** you have one product-page URL and want its structured details.
 - **Takes:** `url` (string URI, **required**), `maxAgeMs` (default 7d, 0–30d), `timeoutMS`.
 - **Gives:** `{ is_product_page, platform (amazon|tiktok_shop|etsy|generic|null), product|null }`. `product`: `{ name, description, price|null, currency|null, billing_frequency(monthly|yearly|one_time|usage_based)|null, pricing_model(per_seat|flat|tiered|freemium|custom)|null, url, category|null, features[], target_audience[], tags[], image_url|null, images[], sku|null }`.
-- **Note:** `product` and `platform` can be `null` even when `is_product_page` is `true` (e.g. a bot-protected storefront), so **branch on both**.
+- **Note:** `product` and `platform` can be `null` even when `is_product_page` is `true`, so **branch on both**. Pages we couldn't reach (blocked, WAF, timeout) and listing/category grids return `400 WEBSITE_ACCESS_ERROR` — not a silent `is_product_page: false`.
 
 ### Extract products from a site
 
@@ -332,32 +363,46 @@ Dedicated code lookups. **SDK namespace is `client.industry.*`, not `web.*`**, d
 
 ---
 
+## People enrichment
+
+### Enrich Person
+
+`POST /people/enrich` · 20 credits · **Beta, paid plans only** · SDK `client.people.enrich`
+[API reference](https://docs.context.dev/api-reference/people/enrich)
+
+- **When:** you have identity clues for a person — a social profile URL, a work email, or a name plus company/education/location — and want one normalized profile with a confidence score.
+- **Takes (JSON body):** any combination of `social_urls[]` (1–20 profile URLs), `name` (`{ first, last }`), `email`, `company` (`{ name, domain }`), `education[]` (`{ institution{name,domain}, degree, field_of_study, graduation_year }`), `location` (`{ city, region, country }`), plus `timeoutMS` and `tags`. All supplied clues are considered together — more clues, better match.
+- **Gives:** `{ match, key_metadata }`. `match` is a discriminated union on `status`: `{ status: "candidate", score (0–100), person{ name{full,first,last}, email, avatar_url, bio, location, social_urls[], website_urls[], current_role{title, organization{name,domain}, location} } }` or `{ status: "not_found", score: null, person: null }`. **Branch on `match.status`** and treat low `score` values as weak matches.
+- **Note:** free-provider and disposable emails return **422** (`FREE_EMAIL_DETECTED` / `DISPOSABLE_EMAIL_DETECTED`) before any credits are charged — handle as "skip enrichment". Free-tier keys get 403; every paid plan has access.
+
+---
+
 ## Prefetch (cache warming)
 
-Free, no rate limit, **paid-subscriber only** (403 `FORBIDDEN` otherwise). Fire-and-forget: the 200 only confirms the domain was queued; it returns **no brand data**. Call `/brand/retrieve` afterward to read the warmed result. Guide: [Prefetching](https://docs.context.dev/optimization/prefetching).
+Free, no rate limit, **paid-subscriber only** (403 `FORBIDDEN` otherwise). Fire-and-forget: the 200 only confirms that work was queued; it returns no brand or styleguide payload. Guide: [Prefetching](https://docs.context.dev/optimization/prefetching).
 
-### Prefetch by domain
+### Prefetch brand data or a styleguide
 
-`POST /brand/prefetch` · 0 credits · SDK `client.utility.prefetch` (Go `Utility.Prefetch`)
-[API reference](https://docs.context.dev/api-reference/utility/prefetch-brand-data-for-a-domain)
+`POST /utility/prefetch` · 0 credits · SDK `client.utility.prefetch` (Go `Utility.Prefetch`)
+[API reference](https://docs.context.dev/api-reference/utility/prefetch)
 
-- **When:** you know a domain ahead of when you'll need it (CRM import, signup form) and want to warm the cache so the later `/brand/retrieve` lands sub-second.
-- **Takes:** `domain` (string, **required**), `timeoutMS`. **Gives:** `{ status, message, domain }`.
+- **When:** you know a domain or work email ahead of when you'll need brand data or a website styleguide and want the later read to land on a warm cache.
+- **Takes:** `type: "brand" | "styleguide"` (**required**), `identifier.domain` or `identifier.email` (exactly one required; both or neither returns **400**), `timeoutMS`. Use `brand` before `/brand/retrieve` and `styleguide` before `/web/styleguide`. **Gives:** `{ status, message, type, domain, key_metadata }`.
+- **Note:** email identifiers extract the domain automatically; free/disposable emails return **422** (`FREE_EMAIL_DETECTED` / `DISPOSABLE_EMAIL_DETECTED`).
 
-### Prefetch by email
+### Legacy prefetch endpoints
 
-`POST /brand/prefetch-by-email` · 0 credits · SDK `client.utility.prefetchByEmail` (Go `Utility.PrefetchByEmail`)
-[API reference](https://docs.context.dev/api-reference/utility/prefetch-brand-data-by-email)
+`POST /brand/prefetch` and `POST /brand/prefetch-by-email` still work unchanged for existing integrations. New integrations should use `POST /utility/prefetch`.
 
-- **When:** same as above but you have a work email; the domain is extracted from it.
-- **Takes:** `email` (string, **required**), `timeoutMS`. **Gives:** `{ status, message, domain }` (the extracted domain).
-- **Note:** free/disposable emails return **422** (`FREE_EMAIL_DETECTED` / `DISPOSABLE_EMAIL_DETECTED`).
+- **Domain takes:** `domain` (string, **required**), `timeoutMS`. **Gives:** `{ status, message, domain }`.
+- **Email takes:** `email` (string, **required**), `timeoutMS`. **Gives:** `{ status, message, domain }` (the extracted domain).
+- **Note:** legacy email prefetch returns **422** (`FREE_EMAIL_DETECTED` / `DISPOSABLE_EMAIL_DETECTED`) for free or disposable providers.
 
 ---
 
 ## Latency
 
-Cached brand lookups return in **under 1 second** (~60% of calls hit the cache). A cold lookup runs a full crawl: **p50 ≈ 7s, p90 ≈ 18s, p99 ≈ 1 min**. If you know the domain/email ahead of time, [prefetch](https://docs.context.dev/optimization/prefetching) it (free) so the later retrieve lands warm; otherwise set `timeoutMS` generously (up to `300000`). Prefetch only warms brand lookups, not `/web/*` or `/brand/ai/*`. Details: [rate limits](https://docs.context.dev/optimization/rate-limits) · [best practices](https://docs.context.dev/optimization/best-practices).
+Cached brand lookups return in **under 1 second** (~60% of calls hit the cache). A cold lookup runs a full crawl: **p50 ≈ 7s, p90 ≈ 18s, p99 ≈ 1 min**. If you know the domain/email ahead of time, [prefetch](https://docs.context.dev/optimization/prefetching) it (free) so the later retrieve lands warm; otherwise set `timeoutMS` generously (up to `300000`). Brand prefetch warms `/brand/retrieve`; styleguide prefetch warms `/web/styleguide`. Neither affects other `/web/*` or `/brand/ai/*` calls. Details: [rate limits](https://docs.context.dev/optimization/rate-limits) · [best practices](https://docs.context.dev/optimization/best-practices).
 
 ## Errors
 
@@ -365,11 +410,12 @@ Errors carry an `error_code`; through the SDKs they surface as typed exceptions 
 
 | Status | Meaning                                                               | Recovery                                                               |
 | ------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 400    | Malformed input; `WEBSITE_ACCESS_ERROR` (site unreachable/blocked); or `NOT_FOUND` (no brand matched — not billed) | Validate input; treat `WEBSITE_ACCESS_ERROR` and `NOT_FOUND` as "no brand / not found" |
+| 400    | Malformed input; `WEBSITE_ACCESS_ERROR` (live site blocked/unscrapable); `WEBSITE_NOT_FOUND` (domain doesn't resolve); `NOT_FOUND` (no brand matched — not billed); `PDF_SKIPPED` (target is a PDF and `pdf[shouldParse]=false`); or `PDF_IMAGES_ONLY` (scanned PDF — retry with OCR enabled) | Validate input; treat `WEBSITE_ACCESS_ERROR`/`WEBSITE_NOT_FOUND`/`NOT_FOUND` as "no brand / not found"; retry `PDF_IMAGES_ONLY` with `ocr=true` |
 | 401    | Missing/invalid key                                                   | Check `CONTEXT_DEV_API_KEY`                                            |
-| 403    | `FORBIDDEN` (e.g. prefetch without a paid plan) / `USAGE_EXCEEDED`    | Check plan / quota                                                     |
+| 403    | `FORBIDDEN` (e.g. prefetch or people enrich without a paid plan) / `USAGE_EXCEEDED` | Check plan / quota                                                     |
 | 408    | Cold-hit or `timeoutMS` exceeded                                      | Prefetch, raise `timeoutMS`, or retry                                  |
-| 422    | Free/disposable email on the `*-by-email` endpoints                   | Skip enrichment for personal emails                                    |
+| 413    | `CONTENT_TOO_LARGE` — requested content exceeds the 20 MB download cap | Permanent for that URL; don't retry                                    |
+| 422    | Free/disposable email on the `*-by-email` endpoints and `/people/enrich`; or `COLD_DOMAIN_TIMEOUT_TOO_LOW` (`timeoutMS` under 10s on an uncached domain) | Skip enrichment for personal emails; raise `timeoutMS` ≥ 10s or prefetch first |
 | 429    | Rate limit                                                            | Exponential backoff                                                    |
 
 Full catalog: [Troubleshooting](https://docs.context.dev/optimization/troubleshooting).
@@ -380,7 +426,7 @@ Full catalog: [Troubleshooting](https://docs.context.dev/optimization/troublesho
 - **Pick the right logo.** Filter by `mode` (`light`/`dark`/`has_opaque_background`) and `type` (`logo` horizontal / `icon` square); don't assume `logos[0]`.
 - **Color `name` is generated**, not the brand's official name; key off `hex`.
 - **Bare domains only** (`stripe.com`), and **XOR `domain`/`directUrl`** on styleguide, fonts, screenshot, and `/brand/ai/products`.
-- **Brand data caches ~3 months** server-side; pass `maxAgeMs: 0` to force a refresh where supported (not on `transaction_identifier`).
+- **Brand data caches ~3 months** server-side; pass `maxAgeMs: 0` to force a refresh where supported.
 - **Logo Link is separate.** For high-volume logo embedding in a UI, use `https://logos.context.dev/?publicClientId=...&domain=...`: a front-end-safe `publicClientId`, no API key, its own quota. See [Get logos from a domain](https://docs.context.dev/guides/get-logo-from-url).
 
 ## Reference

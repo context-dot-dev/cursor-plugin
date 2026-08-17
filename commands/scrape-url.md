@@ -6,8 +6,7 @@ description: Scrape a URL to markdown via Context.dev MCP for live page content 
 # Scrape a URL to markdown
 
 1. Obtain the full **URL** from the user (must include scheme, e.g. `https://example.com/docs`).
-2. Confirm the `context_dev_api` MCP server is enabled. If calls return 401, load the `get-api-key` skill first.
-3. Use MCP `execute` with `client.web.webScrapeMd({ url })` (1 credit).
-4. Return the markdown content from the tool response. Summarize or quote relevant sections if the page is long.
-5. Report `key_metadata.credits_consumed` and `credits_remaining` after the call.
-6. Do not fabricate page content. If the scrape fails (`WEBSITE_ACCESS_ERROR`, timeout), report the error and suggest retrying with a higher `timeoutMS` if appropriate.
+2. Confirm the `context` MCP server is enabled and authenticated. If authentication is required, use the `connect-context-dev` skill.
+3. Call `web-scrape-markdown` with the URL.
+4. Return the relevant Markdown or answer the user's question from it. Preserve source links when useful.
+5. Do not fabricate page content. If the scrape fails, report the actual error and suggest a narrower selector, a longer timeout, or a retry only when appropriate.

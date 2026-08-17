@@ -1,8 +1,8 @@
 {
   "name": "context-dev",
   "displayName": "Context.dev",
-  "version": "1.0.0",
-  "description": "Brand intelligence, web scraping, and structured extraction for AI agents via Context.dev MCP.",
+  "version": "2.0.0",
+  "description": "Search, scrape, crawl, extract, parse, monitor, and process the live web with Context.dev.",
   "author": {
     "name": "Context.dev",
     "email": "hello@context.dev"
@@ -17,15 +17,17 @@
     "brand-dev",
     "context.dev",
     "scraping",
-    "enrichment",
+    "web-search",
+    "structured-extraction",
+    "document-parsing",
+    "monitoring",
+    "batches",
     "classification",
     "mcp",
-    "search",
-    "web-data",
-    "commands"
+    "web-data"
   ],
   "category": "data-analytics",
-  "tags": ["brand", "scraping", "enrichment", "mcp", "web-data"],
+  "tags": ["web-search", "web-scraping", "extraction", "brand", "mcp"],
   "rules": "./rules/",
   "skills": "./skills/",
   "commands": "./commands/",

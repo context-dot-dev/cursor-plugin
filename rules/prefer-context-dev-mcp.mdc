@@ -1,12 +1,25 @@
 ---
-description: Prefer Context.dev MCP for live brand, web, and enrichment data instead of guessing from training data
+description: Use the Context.dev MCP for live web search, scraping, extraction, parsing, brand data, monitoring, and batches
 alwaysApply: false
 ---
 
-When the user asks for company logos, brand colors, scraped web content, product extraction, industry classification, transaction enrichment, or other live web data:
+Use the `context` MCP server instead of memory when the user needs current public-web or Context.dev data.
 
-1. Use the `context_dev_api` MCP server (`search_docs` then `execute`) instead of answering from memory.
-2. Pick the narrowest endpoint that answers the question (for example `retrieve-simplified` when only logos and colors are needed).
-3. Prefer bare domains (`stripe.com`) over full URLs where the API expects a domain.
-4. Mention `key_metadata.credits_consumed` and `key_metadata.credits_remaining` when credit usage is relevant.
-5. If MCP is unavailable, tell the user to configure `CONTEXT_DEV_API_KEY` in Cursor MCP settings rather than fabricating data.
+Choose the narrowest direct tool:
+
+- Unknown source or current topic: `web-search`
+- One known page: `web-scrape-markdown`; raw DOM only: `web-scrape-html`
+- Several linked pages: `web-crawl`; URL inventory: `web-scrape-sitemap`
+- Typed fields from a site: `web-extract`
+- A local file: `parse-document`
+- Visual brand profile by domain: `get-brand`; raw or non-domain brand lookup: `brand-retrieve-unified`
+- Design system, fonts, or rendered page: `web-styleguide`, `web-fonts`, or `web-screenshot`
+- Industry classification: `web-naics` or `web-sic`
+- Large asynchronous work: `submit-batch`, then `get-batch` and `get-batch-results`
+- Recurring change detection: the monitor tools
+
+Do not claim that MCP exposes endpoints absent from its tool list. Prefer bare domains where a tool asks for a domain and full `https://` URLs where a tool asks for a URL. Preserve source URLs and distinguish sourced facts from inference.
+
+Creating, updating, running, cancelling, or deleting monitors and batches changes account state. Perform those actions only when the user clearly requests them, and obtain confirmation before destructive operations.
+
+If the MCP server is unavailable or returns 401, tell the user to enable `context` in Cursor Settings → Tools & MCP and complete OAuth. Do not ask the user to paste an API key into chat.

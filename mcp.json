@@ -1,11 +1,7 @@
 {
   "mcpServers": {
-    "context_dev_api": {
-      "transport": "http",
-      "url": "https://context-dev.stlmcp.com",
-      "headers": {
-        "x-context-dev-api-key": "${CONTEXT_DEV_API_KEY}"
-      }
+    "context": {
+      "url": "https://mcp.context.dev/mcp"
     }
   }
 }

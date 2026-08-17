@@ -26,7 +26,7 @@ Use the **brand API** (see `context-dev` skill) when you need stored logos, mult
 
 1. Sign up at [context.dev/signup](https://context.dev/signup) if needed (free tier: 10,000 Logo Link requests/month).
 2. Copy the **Public Client ID** from [context.dev/dashboard/logolink](https://context.dev/dashboard/logolink). Keys look like `brandLL_xxx`.
-3. Prefer an env var the codebase already uses, e.g. `NEXT_PUBLIC_LOGOLINK_KEY` or `VITE_LOGOLINK_PUBLIC_CLIENT_ID`. Never put `ctxt_secret_` keys in client code.
+3. Prefer an env var the codebase already uses, e.g. `NEXT_PUBLIC_LOGOLINK_KEY` or `VITE_LOGOLINK_PUBLIC_CLIENT_ID`. Never put a private Context.dev API key in client code.
 
 ## Step 2 — Restrict referring domains
 
@@ -40,6 +40,7 @@ https://logos.context.dev/?publicClientId=MY_PUBLIC_CLIENT_ID&domain=TARGET_DOMA
 
 - Replace `MY_PUBLIC_CLIENT_ID` with the user's ID (or env var).
 - Replace `TARGET_DOMAIN` with the company domain variable (bare domain, e.g. `stripe.com`).
+- Optionally add `theme=light` for a dark logo on a light UI or `theme=dark` for a light logo on a dark UI.
 - **GET** and **HEAD** only. Response is the image file; `Content-Type` is `image/png`, `image/svg+xml`, etc.
 - **24-hour** `Cache-Control` on the response. Browser/CDN caching is expected.
 - **Fallback:** if no logo is found, Logo Link returns a generated SVG monogram — `<img>` tags never 404.
