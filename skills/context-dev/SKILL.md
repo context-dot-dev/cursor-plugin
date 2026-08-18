@@ -1,8 +1,7 @@
 ---
 name: context-dev
-description: Use this skill to call the Context.dev API for brand data and web extraction. Make sure to use this skill whenever the user wants to look up a company's logo, colors, socials, industry, address, employee count, or stock ticker by domain, name, work email, ticker, or ISIN; enrich a lead or CRM record; enrich a person or contact from an email, name, or social profile URL; pre-fill an onboarding form; build a customer logo wall or "trusted by" strip; categorize a card or bank transaction descriptor (e.g. "AMZN MKTP US"); scrape a webpage to clean markdown or HTML for an LLM or RAG pipeline; crawl a site or fetch its sitemap; run a web search; extract products or pricing from a storefront; take a screenshot of a webpage; pull a website's design system (colors, fonts, spacing, components) for theming; classify a company by NAICS or SIC; or extract structured data from a website with a JSON Schema, even if they don't explicitly mention "Context.dev" or "Brand API". Requires a CONTEXT_DEV_API_KEY environment variable.
+description: Build application code directly against the Context.dev REST API or SDKs with server-side API-key authentication. Use when the user asks to integrate Context.dev into a codebase, choose an SDK method or REST endpoint, debug an API request, or implement a backend Context.dev workflow. For ordinary live-web work inside Cursor, use the focused Context.dev MCP skills instead.
 license: MIT
-compatibility: Requires a Context.dev API key in the CONTEXT_DEV_API_KEY environment variable. SDKs for TypeScript, Python, Ruby, Go, and PHP; or call the REST API directly.
 metadata:
   author: context.dev
   version: "3.1"

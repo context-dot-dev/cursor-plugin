@@ -225,8 +225,8 @@ async function validateComponents() {
   if (ruleFiles.length !== 2) {
     addError(`expected 2 rules but found ${ruleFiles.length}.`);
   }
-  if (skillFiles.length !== 3) {
-    addError(`expected 3 skills but found ${skillFiles.length}.`);
+  if (skillFiles.length !== 11) {
+    addError(`expected 11 skills but found ${skillFiles.length}.`);
   }
   if (commandFiles.length !== 4) {
     addError(`expected 4 commands but found ${commandFiles.length}.`);
@@ -272,6 +272,31 @@ async function validateInstructionsAreCurrent() {
     if (!content.includes(`\`${toolName}\``)) {
       addError(`${relativeFile} must call the direct MCP tool ${toolName}.`);
     }
+  }
+
+  const skillToolRequirements = new Map([
+    ["skills/context-search/SKILL.md", ["web-search"]],
+    ["skills/context-scrape/SKILL.md", ["web-scrape-markdown", "web-scrape-html", "web-scrape-images", "web-screenshot"]],
+    ["skills/context-crawl/SKILL.md", ["web-scrape-sitemap", "web-crawl"]],
+    ["skills/context-extract/SKILL.md", ["web-extract"]],
+    ["skills/context-parse/SKILL.md", ["parse-document"]],
+    ["skills/context-brand/SKILL.md", ["get-brand", "brand-retrieve-unified", "web-styleguide", "web-fonts", "web-naics", "web-sic"]],
+    ["skills/context-monitor/SKILL.md", ["create-monitor", "update-monitor", "delete-monitor", "run-monitor-now"]],
+    ["skills/context-batches/SKILL.md", ["submit-batch", "get-batch", "get-batch-results", "cancel-batch", "delete-batch"]],
+  ]);
+  for (const [relativeFile, toolNames] of skillToolRequirements) {
+    const content = await fs.readFile(path.join(repoRoot, relativeFile), "utf8");
+    for (const toolName of toolNames) {
+      if (!content.includes(`\`${toolName}\``)) {
+        addError(`${relativeFile} must reference the direct MCP tool ${toolName}.`);
+      }
+    }
+  }
+
+  const directApiSkill = await fs.readFile(path.join(repoRoot, "skills/context-dev/SKILL.md"), "utf8");
+  const directApiFields = parseFrontmatter(directApiSkill);
+  if (!directApiFields?.description?.includes("directly against the Context.dev REST API or SDKs")) {
+    addError("skills/context-dev/SKILL.md must activate only for direct API and SDK development.");
   }
 }
 

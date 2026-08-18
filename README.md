@@ -35,9 +35,25 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 | Component | What it provides |
 | --- | --- |
 | MCP server | The production Context.dev MCP with 34 direct, typed tools and OAuth |
-| Skills | Context.dev API guidance, Cursor connection help, and Logo Link integration |
+| Skills | Focused MCP workflows, direct API guidance, Cursor connection help, and Logo Link integration |
 | Commands | `/brand-colors`, `/scrape-url`, `/search-web`, and `/extract-web-data` |
 | Rules | Routes live-web tasks to the right Context.dev tool and keeps credentials out of client code |
+
+### Skill catalog
+
+| Skill | When Cursor uses it |
+| --- | --- |
+| `context-search` | Live web research and source discovery |
+| `context-scrape` | Markdown, HTML, images, or screenshots from one known URL |
+| `context-crawl` | Sitemap discovery and focused multi-page crawling |
+| `context-extract` | Schema-shaped JSON from websites |
+| `context-parse` | PDFs, Office files, images, and other local document bytes |
+| `context-brand` | Brand profiles, design systems, fonts, and industry codes |
+| `context-monitor` | Recurring website-change detection and history |
+| `context-batches` | Large asynchronous scrape and crawl jobs |
+| `context-dev` | Building directly with the Context.dev REST API or SDKs |
+| `connect-context-dev` | OAuth setup and MCP troubleshooting |
+| `logolink` | Safe dynamic company logos in frontend applications |
 
 ### MCP tool catalog
 
@@ -56,7 +72,7 @@ For a known page, use `web-scrape-markdown`. Use `web-search` when the URL is un
 
 OAuth connects Cursor to the MCP server. If you are writing application code that calls the Context.dev REST API or SDK directly, create an API key in the [Context.dev dashboard](https://context.dev) and keep it in a server-side `CONTEXT_DEV_API_KEY` environment variable. Never put a private API key in browser code or commit it to source control.
 
-The bundled `context-dev` skill is synchronized from [docs.context.dev/skill.md](https://docs.context.dev/skill.md), while the plugin's MCP instructions deliberately describe only the public tools exposed by the production MCP server.
+The bundled `context-dev` API reference is synchronized from [docs.context.dev/skill.md](https://docs.context.dev/skill.md). Its Cursor activation description is narrowed to direct API and SDK development, while the focused OAuth skills route interactive work through the public production MCP tools.
 
 ## Local development
 
@@ -75,7 +91,7 @@ mkdir -p ~/.cursor/plugins/local
 rsync -a --delete --exclude '.git/' ./ ~/.cursor/plugins/local/context-dev/
 ```
 
-Then run **Developer: Reload Window** in Cursor and verify that the `context` MCP server, four commands, three skills, and two rules appear. A copied directory is used because current Cursor builds reject local-plugin symlinks whose targets are outside `~/.cursor/plugins/local`.
+Then run **Developer: Reload Window** in Cursor and verify that the `context` MCP server, four commands, eleven skills, and two rules appear. A copied directory is used because current Cursor builds reject local-plugin symlinks whose targets are outside `~/.cursor/plugins/local`.
 
 ## Links
 

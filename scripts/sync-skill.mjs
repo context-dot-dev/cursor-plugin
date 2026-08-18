@@ -8,6 +8,14 @@ const repoRoot = process.cwd();
 const skillUrl = "https://docs.context.dev/skill.md";
 const skillPath = path.join(repoRoot, "skills", "context-dev", "SKILL.md");
 const checkOnly = process.argv.includes("--check");
+const cursorDescription =
+  "Build application code directly against the Context.dev REST API or SDKs with server-side API-key authentication. Use when the user asks to integrate Context.dev into a codebase, choose an SDK method or REST endpoint, debug an API request, or implement a backend Context.dev workflow. For ordinary live-web work inside Cursor, use the focused Context.dev MCP skills instead.";
+
+function adaptForCursor(body) {
+  return body
+    .replace(/^description:.*$/m, `description: ${cursorDescription}`)
+    .replace(/^compatibility:.*\n/m, "");
+}
 
 async function fetchSkill() {
   let lastError;
@@ -36,14 +44,14 @@ async function main() {
     throw new Error(`${skillUrl} did not return a valid context-dev skill`);
   }
 
-  const expected = `${body}\n`;
+  const expected = `${adaptForCursor(body)}\n`;
 
   if (checkOnly) {
     const current = await fs.readFile(skillPath, "utf8");
     if (current !== expected) {
       throw new Error(`${path.relative(repoRoot, skillPath)} is stale. Run node scripts/sync-skill.mjs.`);
     }
-    console.log(`${path.relative(repoRoot, skillPath)} matches ${skillUrl}`);
+    console.log(`${path.relative(repoRoot, skillPath)} is synchronized with ${skillUrl}`);
     return;
   }
 
