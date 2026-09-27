@@ -1,5 +1,5 @@
 ---
-description: Use the Context.dev MCP for live web search, scraping, extraction, parsing, brand data, monitoring, and batches
+description: Use the Context.dev MCP for live web search, company news, scraping, extraction, parsing, brand data, monitoring, and batches
 alwaysApply: false
 ---
 
@@ -8,13 +8,14 @@ Use the `context` MCP server instead of memory when the user needs current publi
 Choose the narrowest direct tool:
 
 - Unknown source or current topic: `web-search`
-- One known page: `web-scrape-markdown`; raw DOM only: `web-scrape-html`
-- Several linked pages: `web-crawl`; URL inventory: `web-scrape-sitemap`
-- Typed fields from a site: `web-extract`
+- News about one company by name, domain, ticker, or ISIN: `get-news-search`
+- One known page: `web-scrape`; set only the needed `formats` fields
+- Several linked pages: `web-crawl`; URL inventory: `web-map`
+- Typed fields from a known page: `web-scrape` with `formats: { json: true }` and `jsonParams.schema`
+- Sourced JSON research when the URL is unknown: `web-answers`
 - A local file: `parse-document`
 - Visual brand profile by domain: `get-brand`; raw or non-domain brand lookup: `brand-retrieve-unified`
-- Design system, fonts, or rendered page: `web-styleguide`, `web-fonts`, or `web-screenshot`
-- Industry classification: `web-naics` or `web-sic`
+- Design system and fonts: `web-styleguide`; rendered page: `web-scrape` with `formats: { screenshot: true }`
 - Large asynchronous work: `submit-batch`, then `get-batch` and `get-batch-results`
 - Recurring change detection: the monitor tools
 

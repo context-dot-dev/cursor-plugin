@@ -5,14 +5,15 @@ description: Scrape or capture one known webpage with Context.dev. Use when the 
 
 # Scrape one page
 
-Choose the narrowest Context.dev MCP tool for the requested output:
+Use the Context.dev `web-scrape` MCP tool and request only the formats the user needs:
 
-| Need | Tool |
+| Need | Format |
 | --- | --- |
-| Clean readable content for analysis or RAG | `web-scrape-markdown` |
-| Raw DOM or HTML for code-level inspection | `web-scrape-html` |
-| Images and their source metadata | `web-scrape-images` |
-| Visual rendering of the page | `web-screenshot` |
+| Clean readable content for analysis or RAG | `formats: { markdown: true }` |
+| Raw DOM or HTML for code-level inspection | `formats: { html: true }` |
+| Images and their source metadata | `formats: { images: true }` |
+| Visual rendering of the page | `formats: { screenshot: true }` |
+| Schema-shaped JSON | `formats: { json: true }` with `jsonParams.schema` |
 
 ## Workflow
 

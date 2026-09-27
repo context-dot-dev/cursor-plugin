@@ -1,20 +1,23 @@
 ---
 name: context-search
-description: Search the live web with Context.dev and return current, cited sources. Use when the user asks to search, research, look something up, find recent announcements or articles, compare information across sites, or answer a current question without providing a known URL.
+description: Search the live web or company news with Context.dev and return current, cited sources. Use when the user asks to search, research, look something up, find recent company announcements or articles, compare information across sites, or answer a current question without providing a known URL.
 ---
 
 # Search the live web
 
-Use the Context.dev `web-search` MCP tool when the user needs source discovery or current information and does not already have the exact page URL.
+Use the Context.dev `get-news-search` MCP tool for live or historical news about one company identified by name,
+domain, ticker, or ISIN. Use `web-search` for broader source discovery or current information when the user does not
+already have the exact page URL.
 
 ## Workflow
 
-1. Turn the request into a concise search query that preserves named entities, dates, and constraints.
-2. Set freshness or country only when the request calls for it.
-3. Use the smallest result count that can answer the question.
-4. Prefer authoritative or primary sources when the user asks for official information.
-5. Summarize the relevant findings and cite the returned source URLs.
+1. Choose `get-news-search` when the request is specifically about one company's coverage; otherwise use `web-search`.
+2. Preserve named entities, dates, and constraints in the query or company identifier.
+3. Set filters, freshness, or country only when the request calls for them.
+4. Use the smallest result count that can answer the question.
+5. Prefer authoritative or primary sources when the user asks for official information.
+6. Summarize the relevant findings and cite the returned source URLs.
 
-If the user provides a known URL, use `web-scrape-markdown` instead. If a search result must be read in full, scrape only the selected result rather than every result.
+If the user provides a known URL, use `web-scrape` with `formats: { markdown: true }` instead. If a search result must be read in full, scrape only the selected result rather than every result.
 
 Avoid repeating an identical search unless the first call failed or the query materially changed.

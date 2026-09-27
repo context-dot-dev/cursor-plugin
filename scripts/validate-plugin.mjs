@@ -18,6 +18,7 @@ const staleInstructionPatterns = [
   ["retired code-mode search tool", /\bsearch_docs\b/],
   ["retired code-mode SDK execution", /client\.(?:brand\.retrieveSimplified|web\.webScrapeMd)/],
   ["retired MCP API-key header", /x-context-dev-api-key/i],
+  ["retired MCP tool name", /\b(?:web-scrape-html|web-scrape-markdown|web-scrape-images|web-scrape-sitemap|web-screenshot|web-extract|web-fonts|web-naics|web-sic)\b/],
 ];
 
 function addError(message) {
@@ -249,7 +250,9 @@ async function validateInstructionsAreCurrent() {
     "README.md",
     ...((await walkFiles(path.join(repoRoot, "commands"))).map((file) => path.relative(repoRoot, file))),
     ...((await walkFiles(path.join(repoRoot, "rules"))).map((file) => path.relative(repoRoot, file))),
-    "skills/connect-context-dev/SKILL.md",
+    ...((await walkFiles(path.join(repoRoot, "skills")))
+      .filter((file) => path.basename(file) === "SKILL.md" && !file.endsWith(path.join("context-dev", "SKILL.md")))
+      .map((file) => path.relative(repoRoot, file))),
   ];
 
   for (const relativeFile of files) {
@@ -263,9 +266,9 @@ async function validateInstructionsAreCurrent() {
 
   const commandToolRequirements = new Map([
     ["commands/brand-colors.md", "get-brand"],
-    ["commands/scrape-url.md", "web-scrape-markdown"],
+    ["commands/scrape-url.md", "web-scrape"],
     ["commands/search-web.md", "web-search"],
-    ["commands/extract-web-data.md", "web-extract"],
+    ["commands/extract-web-data.md", "web-scrape"],
   ]);
   for (const [relativeFile, toolName] of commandToolRequirements) {
     const content = await fs.readFile(path.join(repoRoot, relativeFile), "utf8");
@@ -275,12 +278,12 @@ async function validateInstructionsAreCurrent() {
   }
 
   const skillToolRequirements = new Map([
-    ["skills/context-search/SKILL.md", ["web-search"]],
-    ["skills/context-scrape/SKILL.md", ["web-scrape-markdown", "web-scrape-html", "web-scrape-images", "web-screenshot"]],
-    ["skills/context-crawl/SKILL.md", ["web-scrape-sitemap", "web-crawl"]],
-    ["skills/context-extract/SKILL.md", ["web-extract"]],
+    ["skills/context-search/SKILL.md", ["web-search", "get-news-search", "web-scrape"]],
+    ["skills/context-scrape/SKILL.md", ["web-scrape"]],
+    ["skills/context-crawl/SKILL.md", ["web-map", "web-crawl", "web-scrape"]],
+    ["skills/context-extract/SKILL.md", ["web-scrape", "web-map"]],
     ["skills/context-parse/SKILL.md", ["parse-document"]],
-    ["skills/context-brand/SKILL.md", ["get-brand", "brand-retrieve-unified", "web-styleguide", "web-fonts", "web-naics", "web-sic"]],
+    ["skills/context-brand/SKILL.md", ["get-brand", "brand-retrieve-unified", "brand-search", "web-styleguide", "people-enrich"]],
     ["skills/context-monitor/SKILL.md", ["create-monitor", "update-monitor", "delete-monitor", "run-monitor-now"]],
     ["skills/context-batches/SKILL.md", ["submit-batch", "get-batch", "get-batch-results", "cancel-batch", "delete-batch"]],
   ]);
