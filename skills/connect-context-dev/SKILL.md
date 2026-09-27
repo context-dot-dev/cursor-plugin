@@ -23,7 +23,7 @@ Use a read-only request:
 Use Context.dev to scrape https://www.context.dev and return the page title.
 ```
 
-The agent should call `web-scrape-markdown`. A successful tool call confirms both the MCP connection and the authenticated Context account.
+The agent should call `web-scrape` with `formats: { markdown: true }`. A successful tool call confirms both the MCP connection and the authenticated Context account.
 
 ## Troubleshooting
 

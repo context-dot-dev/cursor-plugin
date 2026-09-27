@@ -1,6 +1,6 @@
 # Context.dev for Cursor
 
-The official [Context.dev](https://context.dev) plugin for Cursor. Give Cursor reliable access to the live web: search, scraping, crawling, structured extraction, document parsing, brand intelligence, screenshots, recurring monitors, and large asynchronous batches.
+The official [Context.dev](https://context.dev) plugin for Cursor. Give Cursor reliable access to the live web: search, company news, scraping, crawling, structured extraction, document parsing, brand intelligence, screenshots, recurring monitors, and large asynchronous batches.
 
 ## Install and connect
 
@@ -34,7 +34,7 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 
 | Component | What it provides |
 | --- | --- |
-| MCP server | The production Context.dev MCP with 34 direct, typed tools and OAuth |
+| MCP server | The production Context.dev MCP with 40 direct, typed tools and OAuth |
 | Skills | Focused MCP workflows, direct API guidance, Cursor connection help, and Logo Link integration |
 | Commands | `/brand-colors`, `/scrape-url`, `/search-web`, and `/extract-web-data` |
 | Rules | Routes live-web tasks to the right Context.dev tool and keeps credentials out of client code |
@@ -44,9 +44,9 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 | Skill | When Cursor uses it |
 | --- | --- |
 | `context-search` | Live web research and source discovery |
-| `context-scrape` | Markdown, HTML, images, or screenshots from one known URL |
-| `context-crawl` | Sitemap discovery and focused multi-page crawling |
-| `context-extract` | Schema-shaped JSON from websites |
+| `context-scrape` | Markdown, HTML, images, screenshots, or structured JSON from one known URL |
+| `context-crawl` | URL discovery and focused multi-page crawling |
+| `context-extract` | Schema-shaped JSON from a known webpage |
 | `context-parse` | PDFs, Office files, images, and other local document bytes |
 | `context-brand` | Brand profiles, design systems, fonts, and industry codes |
 | `context-monitor` | Recurring website-change detection and history |
@@ -60,13 +60,14 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 | Group | Tools |
 | --- | --- |
 | Parse | `parse-document` |
-| Scrape and crawl | `web-scrape-html`, `web-scrape-markdown`, `web-scrape-images`, `web-scrape-sitemap`, `web-crawl`, `web-screenshot` |
-| Extract and search | `web-extract`, `web-search`, `web-naics`, `web-sic` |
-| Brand and design | `get-brand`, `brand-retrieve-unified`, `web-styleguide`, `web-fonts` |
+| Web | `web-scrape`, `web-map`, `web-crawl`, `web-search`, `web-answers` |
+| Company and people | `get-news-search`, `get-brand`, `brand-retrieve-unified`, `brand-search`, `people-enrich`, `web-styleguide` |
 | Batches | `submit-batch`, `list-batches`, `get-batch`, `get-batch-results`, `cancel-batch`, `delete-batch` |
-| Monitors | `create-monitor`, `list-monitors`, `get-monitor`, `update-monitor`, `delete-monitor`, `run-monitor-now`, `list-monitor-runs`, `get-monitor-run`, `list-monitor-changes`, `list-account-runs`, `list-monitor-credit-usage`, `list-changes`, `get-change` |
+| Monitors | `create-monitor`, `list-monitors`, `get-monitor`, `update-monitor`, `delete-monitor`, `get-monitor-limits`, `list-monitor-credit-usage`, `run-monitor-now`, `list-monitor-runs`, `get-monitor-run`, `list-account-runs`, `list-monitor-changes`, `get-change`, `list-changes`, `rotate-monitor-webhook-secret` |
+| Webhooks | `list-webhook-deliveries`, `get-webhook-delivery`, `list-webhook-delivery-attempts`, `retry-webhook-delivery` |
+| Account and feedback | `list-logs`, `get-log`, `submit-feedback` |
 
-For a known page, use `web-scrape-markdown`. Use `web-search` when the URL is unknown, `web-crawl` for a focused multi-page request, and `submit-batch` for up to 25,000 URLs or a large asynchronous crawl.
+For a known page, use `web-scrape` with `formats: { markdown: true }`. Use `web-search` when the URL is unknown, `web-crawl` for a focused multi-page request, and `submit-batch` for up to 25,000 URLs or a large asynchronous crawl.
 
 ## Building with the Context.dev API
 

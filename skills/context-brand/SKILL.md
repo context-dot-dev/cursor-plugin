@@ -11,10 +11,9 @@ Choose the Context.dev MCP tool by output and identifier:
 | --- | --- |
 | Visual brand profile for a domain | `get-brand` |
 | Raw structured brand data or a non-domain lookup | `brand-retrieve-unified` |
+| Lightweight company-name or domain search | `brand-search` |
 | Website design system and component styling | `web-styleguide` |
-| Website font inventory | `web-fonts` |
-| NAICS classification | `web-naics` |
-| SIC classification | `web-sic` |
+| Person enrichment from identity clues | `people-enrich` |
 
 ## Workflow
 
