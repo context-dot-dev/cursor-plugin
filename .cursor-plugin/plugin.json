@@ -1,7 +1,7 @@
 {
   "name": "context-dev",
   "displayName": "Context.dev",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Search, scrape, crawl, extract, parse, monitor, and process the live web with Context.dev.",
   "author": {
     "name": "Context.dev",
