@@ -55,7 +55,7 @@ Choose the narrowest operation that directly returns the needed result.
 | Starting URL to linked pages in one response, up to 500 pages | `POST /web/crawl` | [Crawl](https://docs.context.dev/crawl/overview) |
 | Starting URL or sitemap to a background crawl, up to 25,000 pages | `POST /batch/submit` with `input.mode: "crawl"` | [Async crawls](https://docs.context.dev/crawl/async) |
 | URL list to Markdown or HTML in the background, up to 25,000 URLs | `POST /batch/submit` | [Batches](https://docs.context.dev/batches/overview) |
-| Search query to ranked web results, optionally with Markdown | `POST /web/search` | [Search](https://docs.context.dev/search/overview) |
+| Search query to ranked web results, optionally with Markdown or highlights | `POST /web/search` | [Search](https://docs.context.dev/search/overview) |
 | Research task to structured JSON and source URLs | `POST /web/answers` | [Answers](https://docs.context.dev/answers/overview) |
 | Uploaded document up to 50 MiB to Markdown | `POST /parse` | [Parse](https://docs.context.dev/parse/overview) |
 | Domain, name, work email, ticker, direct URL, or transaction descriptor to company profile | `POST /brand/retrieve` | [Brand](https://docs.context.dev/brand/overview) |
@@ -139,10 +139,10 @@ An uncached domain or email lookup with `behavior: "fail"` and `timeoutOpts.mill
 
 | Operation | Credits |
 | --- | --- |
-| `POST /web/scrape` | 1, or 2 with `sharedParams.actions`. Highlights +3 when passages are returned; JSON +4 on success; product +1 on success or a missing page; product AI fallback +6 when used; PDF OCR +1 per recovered page on a fresh fetch. 0 when every output fails, except a target 404, which charges the base (+1 with product). |
+| `POST /web/scrape` | 1, or 2 with `sharedParams.actions`. Highlights +1 when passages are returned; JSON +4 on success; product +1 on success or a missing page; product AI fallback +6 when used; PDF OCR +1 per recovered page on a fresh fetch. 0 when every output fails, except a target 404, which charges the base (+1 with product). |
 | `GET /web/urls` | 1, or 2 with `search` |
 | `POST /web/crawl` | 1 per page; rate-limit weight 10 |
-| `POST /web/search` | 1 per 10 results, with or without page content |
+| `POST /web/search` | 1 per 10 results; Markdown and highlights each add 1 per 10 results when returned |
 | `POST /web/answers` | 10 (`fast`) or 100 (`ultra`, the default), charged only on success |
 | `POST /parse` | 1, plus 1 per OCR-recovered page |
 | `POST /brand/retrieve`, `GET /web/styleguide` | 10 |

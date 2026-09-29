@@ -14,9 +14,10 @@ already have the exact page URL.
 1. Choose `get-news-search` when the request is specifically about one company's coverage; otherwise use `web-search`.
 2. Preserve named entities, dates, and constraints in the query or company identifier.
 3. Set filters, freshness, or country only when the request calls for them.
-4. Use the smallest result count that can answer the question.
-5. Prefer authoritative or primary sources when the user asks for official information.
-6. Summarize the relevant findings and cite the returned source URLs.
+4. Enable `highlightsOptions` when the answer needs relevant source passages, or `markdownOptions` when it needs complete page content.
+5. Use the smallest result count that can answer the question.
+6. Prefer authoritative or primary sources when the user asks for official information.
+7. Summarize the relevant findings and cite the returned source URLs.
 
 If the user provides a known URL, use `web-scrape` with `formats: { markdown: true }` instead. If a search result must be read in full, scrape only the selected result rather than every result.
 
