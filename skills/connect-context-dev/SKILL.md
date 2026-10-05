@@ -34,7 +34,7 @@ The agent should call `web-scrape` with `formats: { markdown: true }`. A success
 | 401 or authentication required | Disconnect the server, reconnect it, and complete OAuth again |
 | Browser flow does not open | Open the server details and select Authenticate manually |
 | Tools remain unavailable after OAuth | Reload the Cursor window and re-enable the server |
-| Account has insufficient credits | Review usage in the Context.dev dashboard; do not repeatedly retry |
+| Account has insufficient credits | Use `get-usage` to check the balance and next refill; use `get-usage-history` for recent consumption; do not repeatedly retry |
 
 Never ask the user to paste an OAuth token or private API key into chat.
 

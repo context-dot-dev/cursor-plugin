@@ -1,8 +1,8 @@
 {
   "name": "context-dev",
   "displayName": "Context.dev",
-  "version": "2.3.0",
-  "description": "Search, scrape, crawl, extract, parse, monitor, and process the live web with Context.dev.",
+  "version": "2.4.0",
+  "description": "Search, scrape, crawl, extract, parse, monitor, inspect usage, and process the live web with Context.dev.",
   "author": {
     "name": "Context.dev",
     "email": "hello@context.dev"
