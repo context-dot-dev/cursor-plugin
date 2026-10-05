@@ -4,8 +4,8 @@ description: Build application code directly against the Context.dev REST API or
 license: MIT
 metadata:
   author: context.dev
-  version: "5.2"
-  last_verified: "2026-09-26"
+  version: "5.3"
+  last_verified: "2026-09-27"
 ---
 
 # Context.dev integration guide
@@ -139,9 +139,9 @@ An uncached domain or email lookup with `behavior: "fail"` and `timeoutOpts.mill
 
 | Operation | Credits |
 | --- | --- |
-| `POST /web/scrape` | 1, or 2 with `sharedParams.actions`. Highlights +1 when passages are returned; JSON +4 on success; product +1 on success or a missing page; product AI fallback +6 when used; PDF OCR +1 per recovered page on a fresh fetch. 0 when every output fails, except a target 404, which charges the base (+1 with product). |
+| `POST /web/scrape` | 1, or 2 with `sharedParams.actions`. Highlights +1 when passages are returned; JSON +4 on success; product +1 on success or a missing page; PDF OCR +1 per recovered page on a fresh fetch. 0 when every output fails, except a target 404, which charges the base (+1 with product). |
 | `GET /web/urls` | 1, or 2 with `search` |
-| `POST /web/crawl` | 1 per page; rate-limit weight 10 |
+| `POST /web/crawl` | 1 per page; rate-limit weight 10 on per-minute plans |
 | `POST /web/search` | 1 per 10 results; Markdown and highlights each add 1 per 10 results when returned |
 | `POST /web/answers` | 10 (`fast`) or 100 (`ultra`, the default), charged only on success |
 | `POST /parse` | 1, plus 1 per OCR-recovered page |
@@ -170,7 +170,7 @@ Inspect both the HTTP status and `error_code` for request errors. Scrape also re
 | `200` with a failed Scrape output | Retrieval, parsing, actions, selectors, or output limits prevented that output from completing | Preserve successful outputs and fix the target or options before retrying the failed output. Oversized outputs have `success: false` and `data: null`. |
 | `413`, `415` | Content too large (such as a Parse upload over 50 MiB) or unsupported, on operations that define these errors | Use a smaller or supported input. Scrape marks such outputs as failed instead. |
 | `422` | An operation-specific input restriction, such as a free email domain or a Brand timeout that is too low | Change the input or options; do not retry unchanged. |
-| `429` | Rate limit for this API key | Honor `Retry-After`; retry with jittered, bounded backoff. |
+| `429` | Organization concurrency limit, or the API key's per-minute limit on older plans | Honor `Retry-After`; keep parallel calls within the concurrency limit and retry with jittered, bounded backoff. |
 | `500`, `502`, `503` | Transient failure: a service error, an incomplete browser capture, or no browser capacity | Retry with jittered, bounded backoff, then surface a fallback. |
 
 Do not retry validation, permission, no-match, content-size, or unsupported-media failures unchanged. The SDKs already retry twice; account for that before adding another retry layer. See [Troubleshooting](https://docs.context.dev/optimization/troubleshooting) and [Rate limits](https://docs.context.dev/optimization/rate-limits) for operation-specific behavior.

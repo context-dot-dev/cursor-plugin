@@ -1,6 +1,6 @@
 # Context.dev for Cursor
 
-The official [Context.dev](https://context.dev) plugin for Cursor. Give Cursor reliable access to the live web: search, company news, scraping, crawling, structured extraction, document parsing, brand intelligence, screenshots, recurring monitors, and large asynchronous batches.
+The official [Context.dev](https://context.dev) plugin for Cursor. Give Cursor reliable access to the live web: search, company news, scraping, crawling, structured extraction, document parsing, brand intelligence, screenshots, recurring monitors, account usage, and large asynchronous batches.
 
 ## Install and connect
 
@@ -34,7 +34,7 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 
 | Component | What it provides |
 | --- | --- |
-| MCP server | The production Context.dev MCP with 40 direct, typed tools and OAuth |
+| MCP server | The production Context.dev MCP with 42 direct, typed tools and OAuth |
 | Skills | Focused MCP workflows, direct API guidance, Cursor connection help, and Logo Link integration |
 | Commands | `/brand-colors`, `/scrape-url`, `/search-web`, and `/extract-web-data` |
 | Rules | Routes live-web tasks to the right Context.dev tool and keeps credentials out of client code |
@@ -65,7 +65,7 @@ Cursor automatically selects the appropriate Context.dev tool. Tool calls requir
 | Batches | `submit-batch`, `list-batches`, `get-batch`, `get-batch-results`, `cancel-batch`, `delete-batch` |
 | Monitors | `create-monitor`, `list-monitors`, `get-monitor`, `update-monitor`, `delete-monitor`, `get-monitor-limits`, `list-monitor-credit-usage`, `run-monitor-now`, `list-monitor-runs`, `get-monitor-run`, `list-account-runs`, `list-monitor-changes`, `get-change`, `list-changes`, `rotate-monitor-webhook-secret` |
 | Webhooks | `list-webhook-deliveries`, `get-webhook-delivery`, `list-webhook-delivery-attempts`, `retry-webhook-delivery` |
-| Account and feedback | `list-logs`, `get-log`, `submit-feedback` |
+| Account and feedback | `get-usage`, `get-usage-history`, `list-logs`, `get-log`, `submit-feedback` |
 
 For a known page, use `web-scrape` with `formats: { markdown: true }`. Use `web-search` when the URL is unknown, `web-crawl` for a focused multi-page request, and `submit-batch` for up to 25,000 URLs or a large asynchronous crawl.
 
